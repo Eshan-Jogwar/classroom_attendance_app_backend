@@ -1,9 +1,11 @@
-use std::sync::Arc;
-
-use crate::{server::server::{construct_listener, construct_router}, state::session_state::AppState};
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::{RwLock};
+use crate::{server::{middleware::debugger::{debugger_middleware}, server::{construct_listener, construct_router}}, state::session_state::AppState};
 
 pub mod server;
 pub mod state;
+pub mod utils;
+
 
 #[tokio::main]
 async fn main() {
@@ -11,10 +13,9 @@ async fn main() {
     let listener = construct_listener().await;
     
     let app_state = AppState {
-        sessions: Vec::new(),
+        sessions: RwLock::new(HashMap::new()),
     };
-
     let router = router.with_state(Arc::new(app_state));
-
+    let router = router.layer(axum::middleware::from_fn(debugger_middleware));
     axum::serve(listener, router).await.unwrap();
 }

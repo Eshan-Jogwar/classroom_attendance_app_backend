@@ -2,11 +2,13 @@ use axum::Router;
 use tokio::net::TcpListener;
 use std::net::SocketAddr;
 
-use crate::{server::health_router::health_create_router, state::session_state::{StateType}};
+use crate::{server::{health_router::health_create_router, routes::{session_router::session_create_router, student_router::student_create_router}}, state::session_state::StateType};
 
 pub async fn construct_router() -> Router<StateType> {
     let router = Router::<StateType>::new();
     let router = router.nest("/health", health_create_router());
+    let router = router.nest("/session", session_create_router());
+    let router = router.nest("/student", student_create_router());
     return router;
 }
 
